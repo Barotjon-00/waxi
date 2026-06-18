@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 
 // ─── Палитра ───────────────────────────────────────────────
 const C = {
@@ -98,6 +98,7 @@ function StickerPicker({ options, selected, onSelect, custom, onUpload }) {
           return (
             <button
               key={i}
+              className="waxi-pick"
               onClick={() => onSelect(i)}
               style={{
                 width: 72, height: 72, borderRadius: 14, cursor: "pointer",
@@ -159,16 +160,29 @@ function Sticker({ emoji, src, size = 96 }) {
 // ─── Превью-телефон ────────────────────────────────────────
 function Phone({ children }) {
   return (
-    <div style={{
-      width: 280, borderRadius: 36, padding: 14,
-      background: `linear-gradient(160deg, ${C.accentSoft}, ${C.accent})`,
-      boxShadow: "0 20px 50px rgba(209,75,124,0.25)", position: "sticky", top: 24,
+    <div className="waxi-phone" style={{
+      width: 284, borderRadius: 42, padding: 12,
+      background: "linear-gradient(160deg, #2a2030, #1a141c)",
+      boxShadow: "0 24px 60px rgba(209,75,124,0.3), inset 0 0 0 2px rgba(255,255,255,0.06)",
+      position: "sticky", top: 24,
     }}>
       <div style={{
-        background: "#fff", borderRadius: 26, minHeight: 460, padding: "28px 22px",
-        display: "flex", flexDirection: "column", alignItems: "center",
+        background: "linear-gradient(170deg, #fff 0%, #fff7fb 100%)", borderRadius: 32, minHeight: 470, padding: "34px 22px 26px",
+        display: "flex", flexDirection: "column", alignItems: "center", position: "relative", overflow: "hidden",
       }}>
-        {children}
+        {/* вырез камеры */}
+        <div style={{
+          position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)",
+          width: 86, height: 22, background: "#1a141c", borderRadius: 14, zIndex: 5,
+          display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 10,
+        }}>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "linear-gradient(135deg,#5a4a55,#2a2030)", boxShadow: "0 0 2px rgba(255,255,255,0.3)" }} />
+        </div>
+        {/* блик */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 120, background: "linear-gradient(180deg, rgba(255,255,255,0.5), transparent)", pointerEvents: "none", zIndex: 1 }} />
+        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", width: "100%", marginTop: 6 }}>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -178,6 +192,68 @@ function Phone({ children }) {
 export default function App() {
   const [step, setStep] = useState(1);
   const [showResult, setShowResult] = useState(false);
+
+  // подключаем шрифт + глобальные стили и анимации
+  useEffect(() => {
+    const id = "waxi-styles";
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap";
+    document.head.appendChild(link);
+
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      @keyframes waxiFadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes waxiPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(236,106,149,0.45); }
+        50% { box-shadow: 0 0 0 8px rgba(236,106,149,0); }
+      }
+      @keyframes waxiFloat {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(8deg); }
+      }
+      @keyframes waxiDrift {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+        10% { opacity: 0.5; }
+        90% { opacity: 0.5; }
+        100% { transform: translateY(-120vh) rotate(40deg); opacity: 0; }
+      }
+      @keyframes waxiPop {
+        0% { transform: scale(0.4); opacity: 0; }
+        60% { transform: scale(1.15); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      @keyframes waxiShine {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+      .waxi-fade { animation: waxiFadeIn 0.5s cubic-bezier(.21,1.02,.73,1) both; }
+      .waxi-btn { transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease, filter 0.2s ease; }
+      .waxi-btn:hover { transform: translateY(-3px); filter: brightness(1.06); box-shadow: 0 10px 26px rgba(209,75,124,0.4); }
+      .waxi-btn:active { transform: translateY(0) scale(0.96); }
+      .waxi-card { transition: transform 0.22s ease, box-shadow 0.25s ease, border-color 0.2s ease; }
+      .waxi-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(209,75,124,0.14); }
+      .waxi-pick { transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease, border-color 0.15s ease; }
+      .waxi-pick:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 10px 22px rgba(209,75,124,0.25); }
+      .waxi-step { transition: background 0.35s ease, transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease; }
+      .waxi-step:hover { transform: scale(1.15); }
+      .waxi-step-done { animation: waxiPop 0.4s ease both; }
+      .waxi-phone { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+      .waxi-phone:hover { transform: translateY(-6px) rotate(-1deg); }
+      .waxi-heart { position: absolute; pointer-events: none; user-select: none; will-change: transform; }
+      textarea, input { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+      textarea:focus, input:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 3px rgba(236,106,149,0.15); }
+      @media (prefers-reduced-motion: reduce) { .waxi-heart { display: none; } * { animation: none !important; } }
+    `;
+    document.head.appendChild(style);
+  }, []);
 
   const [data, setData] = useState({
     // экран 1
@@ -316,27 +392,91 @@ export default function App() {
 
   return (
     <div style={{
-      minHeight: "100vh", background: C.bg, fontFamily: "'Segoe UI', system-ui, sans-serif",
-      color: C.ink, padding: "28px 16px 60px",
+      minHeight: "100vh",
+      background: "linear-gradient(160deg, #FFF0F6 0%, #FDE4EF 45%, #FCD9E8 100%)",
+      fontFamily: "'Nunito', 'Segoe UI', system-ui, sans-serif",
+      color: C.ink, padding: "28px 16px 60px", position: "relative", overflow: "hidden",
     }}>
+      {/* шрифты + анимации + декоративный фон */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap');
+        @keyframes floatHeart { 0%{transform:translateY(0) rotate(0);opacity:.5} 50%{opacity:.9} 100%{transform:translateY(-120vh) rotate(40deg);opacity:0} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(236,106,149,.5)} 50%{box-shadow:0 0 0 8px rgba(236,106,149,0)} }
+        .wx-fade { animation: fadeUp .45s ease both; }
+        .wx-btn { transition: transform .15s ease, box-shadow .2s ease, filter .2s ease; }
+        .wx-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 8px 22px rgba(209,75,124,.35) !important; }
+        .wx-btn:active { transform: translateY(0) scale(.98); }
+        .wx-card { transition: transform .18s ease, box-shadow .25s ease, border-color .2s ease; }
+        .wx-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(209,75,124,.18); }
+        .wx-pick { transition: transform .15s ease, box-shadow .2s ease; }
+        .wx-pick:hover { transform: scale(1.06); }
+        .wx-heart { position: fixed; bottom: -40px; font-size: 22px; pointer-events: none; z-index: 0; animation: floatHeart linear infinite; }
+        textarea, input { transition: border-color .18s ease, box-shadow .18s ease; }
+        textarea:focus, input:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 3px rgba(248,175,200,.4); }
+      `}</style>
+
+      {/* плавающие сердечки */}
+      {[...Array(9)].map((_, i) => (
+        <div key={i} className="wx-heart" style={{
+          left: `${8 + i * 11}%`,
+          animationDuration: `${11 + (i % 4) * 3}s`,
+          animationDelay: `${i * 1.7}s`,
+          color: i % 2 ? C.accentSoft : C.accent,
+          opacity: 0.5,
+        }}>{i % 3 === 0 ? "♥" : i % 3 === 1 ? "💗" : "🩷"}</div>
+      ))}
+
+      <div style={{ position: "relative", zIndex: 1 }}>
       {/* лого */}
       <div style={{ textAlign: "center", marginBottom: 8 }}>
-        <div style={{ fontSize: 32, fontWeight: 800, color: C.accent, fontStyle: "italic" }}>waxi</div>
-        <div style={{ fontSize: 12, letterSpacing: 3, color: C.accentDeep, fontWeight: 700 }}>люблю тебя</div>
+        <div style={{
+          fontSize: 46, fontWeight: 400, fontFamily: "'Pacifico', cursive", lineHeight: 1,
+          background: `linear-gradient(120deg, ${C.accent}, ${C.accentDeep}, ${C.accent})`,
+          backgroundSize: "200% auto",
+          WebkitBackgroundClip: "text", backgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          animation: "waxiShine 4s linear infinite",
+          display: "inline-block",
+        }}>waxi <span style={{ fontSize: 26 }}>💌</span></div>
+        <div style={{ fontSize: 12, letterSpacing: 3, color: C.accentDeep, fontWeight: 700, marginTop: 2 }}>ОНЛАЙН-ОТКРЫТКИ</div>
       </div>
 
       {/* шаги */}
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 0, margin: "24px auto", maxWidth: 560 }}>
-        {[1, 2, 3, 4, 5].map((n, i) => (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: 0, margin: "24px auto 8px", maxWidth: 600 }}>
+        {[1, 2, 3, 4, 5].map((n, i) => {
+          const done = n < step, active = n === step;
+          return (
           <React.Fragment key={n}>
-            <button onClick={() => setStep(n)} style={{
-              width: 34, height: 34, borderRadius: "50%", border: "none", cursor: "pointer",
-              fontWeight: 700, fontSize: 15, color: "#fff",
-              background: n <= step ? C.accent : C.accentSoft,
-            }}>{n}</button>
-            {i < 4 && <div style={{ flex: 1, height: 3, background: n < step ? C.accent : C.line }} />}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: 64 }}>
+              <button
+                className="waxi-step"
+                onClick={() => setStep(n)}
+                style={{
+                  width: 40, height: 40, borderRadius: "50%", border: "none", cursor: "pointer",
+                  fontWeight: 800, fontSize: 16, color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: done
+                    ? `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})`
+                    : active
+                      ? `linear-gradient(135deg, ${C.accentSoft}, ${C.accent})`
+                      : "#F3D3E0",
+                  boxShadow: active ? "0 6px 16px rgba(236,106,149,0.45)" : done ? "0 4px 10px rgba(209,75,124,0.3)" : "none",
+                  animation: active ? "waxiPulse 2s ease-in-out infinite" : "none",
+                }}
+              >{done ? "✓" : n}</button>
+              <span style={{
+                fontSize: 10.5, fontWeight: active ? 800 : 600, textAlign: "center", lineHeight: 1.2,
+                color: active ? C.accentDeep : done ? C.accent : C.muted,
+              }}>{STEPS[i]}</span>
+            </div>
+            {i < 4 && <div style={{
+              flex: 1, height: 3, marginTop: 18, borderRadius: 3,
+              background: n < step ? `linear-gradient(90deg, ${C.accent}, ${C.accentDeep})` : C.line,
+              transition: "background 0.4s ease",
+            }} />}
           </React.Fragment>
-        ))}
+        );})}
       </div>
 
       {/* основная сетка */}
@@ -348,14 +488,28 @@ export default function App() {
         {step !== 1 && <div>{step === 2 ? <Phone12 /> : <Preview />}</div>}
 
         {/* правая колонка — редактор */}
-        <div style={{
-          background: C.card, borderRadius: 24, padding: 28,
-          boxShadow: "0 8px 30px rgba(209,75,124,0.08)",
+        <div key={step} className="waxi-fade" style={{
+          background: "linear-gradient(180deg, #ffffff, #fffafc)", borderRadius: 28, padding: 28,
+          boxShadow: "0 12px 40px rgba(209,75,124,0.12)", border: "1px solid rgba(243,211,224,0.6)",
         }}>
           {/* ШАГ 1 — только waxi */}
           {step === 1 && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 360 }}>
-              <h2 style={{ fontSize: 48, fontWeight: 800, color: C.accent, fontStyle: "italic", margin: 0 }}>waxi любов моя ты </h2>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 360, gap: 14 }}>
+              <div style={{ fontSize: 56, animation: "waxiFloat 3.5s ease-in-out infinite" }}>💕</div>
+              <h2 style={{
+                fontSize: 52, fontWeight: 400, margin: 0, fontFamily: "'Pacifico', cursive",
+                background: `linear-gradient(120deg, ${C.accent}, ${C.accentDeep})`,
+                WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent",
+              }}>Waxi люблю тебя</h2>
+              <p style={{ color: C.muted, fontSize: 15, margin: 0, textAlign: "center", maxWidth: 280 }}>
+                Создай красивое приглашение на свидание за 5 шагов 💌
+              </p>
+              <button className="waxi-btn" onClick={() => setStep(2)} style={{
+                marginTop: 10, padding: "14px 36px", borderRadius: 26, border: "none", color: "#fff",
+                fontSize: 16, fontWeight: 700, cursor: "pointer",
+                background: `linear-gradient(90deg, ${C.accent}, ${C.accentDeep})`,
+                boxShadow: "0 8px 22px rgba(209,75,124,0.35)",
+              }}>Начать ✨</button>
             </div>
           )}
 
@@ -467,14 +621,14 @@ export default function App() {
               ← Назад
             </button>
             {step < 5 ? (
-              <button onClick={() => setStep((s) => Math.min(5, s + 1))}
-                style={{ padding: "12px 28px", borderRadius: 24, border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", background: `linear-gradient(90deg, ${C.accentSoft}, ${C.accent})` }}>
-                Далее
+              <button className="waxi-btn" onClick={() => setStep((s) => Math.min(5, s + 1))}
+                style={{ padding: "13px 32px", borderRadius: 26, border: "none", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", background: `linear-gradient(90deg, ${C.accent}, ${C.accentDeep})`, boxShadow: "0 6px 18px rgba(209,75,124,0.3)" }}>
+                Далее →
               </button>
             ) : (
-              <button onClick={() => setShowResult(true)}
-                style={{ padding: "12px 28px", borderRadius: 24, border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", background: `linear-gradient(90deg, ${C.accent}, ${C.accentDeep})` }}>
-                Создать приглашение
+              <button className="waxi-btn" onClick={() => setShowResult(true)}
+                style={{ padding: "13px 32px", borderRadius: 26, border: "none", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", background: `linear-gradient(90deg, ${C.accent}, ${C.accentDeep})`, boxShadow: "0 6px 18px rgba(209,75,124,0.35)" }}>
+                Создать приглашение ✨
               </button>
             )}
           </div>
@@ -572,6 +726,7 @@ export default function App() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -597,10 +752,10 @@ function ResultPhone({ label, children }) {
 
 function SectionCard({ title, children, onDelete }) {
   return (
-    <div style={{ border: `1.5px solid ${C.line}`, borderRadius: 18, padding: 20, marginBottom: 20 }}>
+    <div className="waxi-card" style={{ border: `1.5px solid ${C.line}`, borderRadius: 20, padding: 20, marginBottom: 20, background: "linear-gradient(180deg, #fff, #fffdfe)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <span style={{ color: C.accentDeep, fontWeight: 600, fontSize: 15 }}>{title}</span>
-        {onDelete && <button onClick={onDelete} style={{ background: "none", border: "none", color: C.accent, cursor: "pointer", fontSize: 14 }}>Удалить</button>}
+        <span style={{ color: C.accentDeep, fontWeight: 700, fontSize: 15 }}>{title}</span>
+        {onDelete && <button onClick={onDelete} style={{ background: "none", border: "none", color: C.accent, cursor: "pointer", fontSize: 14, fontWeight: 600 }}>Удалить</button>}
       </div>
       {children}
     </div>
