@@ -322,7 +322,7 @@ export default function App() {
       {/* лого */}
       <div style={{ textAlign: "center", marginBottom: 8 }}>
         <div style={{ fontSize: 32, fontWeight: 800, color: C.accent, fontStyle: "italic" }}>waxi</div>
-        <div style={{ fontSize: 12, letterSpacing: 3, color: C.accentDeep, fontWeight: 700 }}>ОНЛАЙН-ОТКРЫТКИ</div>
+        <div style={{ fontSize: 12, letterSpacing: 3, color: C.accentDeep, fontWeight: 700 }}>люблю тебя</div>
       </div>
 
       {/* шаги */}
@@ -355,7 +355,7 @@ export default function App() {
           {/* ШАГ 1 — только waxi */}
           {step === 1 && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 360 }}>
-              <h2 style={{ fontSize: 48, fontWeight: 800, color: C.accent, fontStyle: "italic", margin: 0 }}>waxi</h2>
+              <h2 style={{ fontSize: 48, fontWeight: 800, color: C.accent, fontStyle: "italic", margin: 0 }}>waxi любов моя ты </h2>
             </div>
           )}
 
